@@ -15,10 +15,21 @@ internal class TemplateCompilerImpl : TemplateCompiler {
         val params = findParameters(input)
         val inputParamMaps = parameters.toMap()
         var output = input
+
+        val missing = buildSet {
+            params.forEach { param ->
+                if (!inputParamMaps.containsKey(param.name)) {
+                    add(param.name)
+                }
+            }
+        }
+
+        if (missing.isNotEmpty()) throw ParametersNotFoundException(missing, inputParamMaps)
+
         params.forEach { param ->
             output = output.replace(
                 oldValue = param.raw,
-                newValue = inputParamMaps[param.name]?.toString() ?: throw ParameterNotFoundException(param, inputParamMaps)
+                newValue = inputParamMaps[param.name].toString()
             )
         }
         return output
